@@ -15,6 +15,13 @@ class CreateViewsTable extends Migration
     {
         Schema::create('views', function (Blueprint $table) {
             $table->increments('id');
+            $table->string('url');
+            $table->string('ip_address');
+            $table->string('session_id');
+            $table->string('item_type');
+            $table->string('item_id');
+            $table->string('email');
+            $table->string('marketing_tracking_code');
             $table->timestamps();
         });
     }
