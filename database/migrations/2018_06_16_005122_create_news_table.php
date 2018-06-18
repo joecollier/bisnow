@@ -6,16 +6,6 @@ use Illuminate\Database\Migrations\Migration;
 
 class CreateNewsTable extends Migration
 {
-     // public function up() {
-     //   Schema::create('breeds', function($table) {
-     //     $table->increments('id');
-     //     $table->string('name');
-     //   });
-     // }
-     // public function down() {
-     //   Schema::drop('breeds');
-     // }
-
     /**
      * Run the migrations.
      *
@@ -26,7 +16,7 @@ class CreateNewsTable extends Migration
         Schema::create('news', function (Blueprint $table) {
             $table->increments('id');
             $table->string('title', 64);
-            $table->string('html_body', 16383);
+            $table->text('html_body');
             // $table->increments('created_at');
             $table->timestamps();
         });
