@@ -11,6 +11,21 @@
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
+Route::get('/', '\App\Controllers\HomeController@index');
+
+Route::get('home', '\App\Controllers\HomeController@index');
+
+Route::get('news', '\App\Controllers\NewsController@index');
+
+Route::get('news/{id}', '\App\Controllers\NewsController@index');
+
+Route::get('events', '\App\Controllers\EventsController@index');
+
+Route::get('/events/{id}', function ($id) {
+    return 'Events! - ' . $id;
 });
+
+Route::get('/tracking', function () {
+    return 'Tracking!';
+});
+
