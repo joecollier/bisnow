@@ -16,12 +16,11 @@ class NewsController {
 
         $news = ($id > 0)
             ? News::where('id', $id)->get()
-            : News::all();
-
-        // var_dump($news);
+            : News::where('id', '>', 0)->paginate(3);
 
         return view($this->view_path . '/index', [
             'news' => $news,
+            'has_pagination' => method_exists($news, 'links'),
             'path' => $this->item_path]);
     }
 }
