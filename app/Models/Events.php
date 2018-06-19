@@ -4,16 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class News extends Model
+class Events extends Model
 {
-    protected $fillable = [
-        'title',
-        'html_body',
-        'date'
-    ];
-
-    protected $table = 'news';
-
     public function images(){
         return $this->hasMany('App\Images');
     }
