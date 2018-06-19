@@ -1,6 +1,15 @@
 @extends('base')
 @section('title', 'EVENTS')
 @section('content')
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $.ajax({
+                type: 'GET',
+                url : "/tracking/news_views"
+            });
+        });
+    </script>
+
     <div id="events-container">
         @foreach ($events as $events_item)
         <link href="{{ asset('css/events.css') }}" rel="stylesheet">
