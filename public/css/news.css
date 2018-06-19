@@ -20,12 +20,11 @@
     clear: both;
     padding: 6px 8px 8px 8px;
     text-align: center;
-    background-color: #ffffff;
 }
 
-.news-item-title {
+/*.news-item-title {
     background-color: #ffefef !important;
-}
+}*/
 
 .news-item-html {
     box-shadow: 0px 1px 8px 1px rgba(0, 0, 0, 0.15);
