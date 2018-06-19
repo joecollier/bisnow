@@ -17,6 +17,25 @@ class CreateImagesTable extends Migration
             $table->increments('id');
             $table->string('name');
             $table->string('path');
+
+            $table->integer('event_id')
+                ->nullable()
+                ->unsigned();
+
+            $table->foreign('event_id')
+                ->references('id')
+                ->on('events')
+                ->onDelete('cascade');
+
+            $table->integer('news_id')
+                ->nullable()
+                ->unsigned();
+
+            $table->foreign('news_id')
+                ->references('id')
+                ->on('news')
+                ->onDelete('cascade');
+
             $table->timestamps();
         });
     }
