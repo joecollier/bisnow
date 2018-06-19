@@ -2,10 +2,11 @@
 
 namespace App\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\News;
+use Illuminate\Http\Request;
 
-class NewsController {
+class NewsController
+{
     protected $view_path = 'news';
     protected $item_path = 'news/';
 

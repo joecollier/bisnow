@@ -25,7 +25,7 @@ Route::get('/events/{id}', function ($id) {
     return 'Events! - ' . $id;
 });
 
-Route::get('/tracking', function () {
-    return 'Tracking!';
-});
+Route::get('tracking', '\App\Controllers\TrackingController@index');
+
+Route::post('tracking', '\App\Controllers\TrackingController@Store');
 
