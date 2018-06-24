@@ -5,38 +5,203 @@ namespace App\Controllers;
 use App\Models\Tracking;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Response as FacadeResponse;
+use League\Csv\Writer;
 
 class TrackingController
 {
-    protected $view_type = 'website_views';
+    /**
+     * [$type_item_type_mapping description]
+     * @var [type]
+     */
+    protected $type_item_type_mapping = [
+        'news_views' => 'news',
+        'events_views' => 'events',
+        'website_views' => 'website',
+    ];
 
-    protected function getSessionId()
+    /**
+     * [$csv_headers description]
+     * @var [type]
+     */
+    protected $csv_headers = [
+        'date_start','date_end','type','events','home','news','total'
+    ];
+
+    /**
+     * [getTotalPageViews description]
+     *
+     * @param  [type] $date_start [description]
+     * @param  [type] $date_end   [description]
+     *
+     * @return [type]             [description]
+     */
+    protected function getTotalPageViews($date_start, $date_end)
     {
-        if (empty(session_id())) {
-            session_start();
-        }
-
-        return session_id();
+        $tracking_data_total = Tracking::whereBetween('date', [$date_start, $date_end])
+            ->where('type', 'website_views')
+            ->get(['value']);
+        return array_sum(array_column($tracking_data_total->toArray(), 'value')) ?? 0;
     }
 
-    protected function getNewViewCountByDateTypeAndSessionId($date, $type, $session_id)
+    /**
+     * [getTotalUniqueViews description]
+     *
+     * @param  [type] $date_start [description]
+     * @param  [type] $date_end   [description]
+     *
+     * @return [type]             [description]
+     */
+    protected function getTotalUniqueViews($date_start, $date_end)
     {
-        $tracking = Tracking::where('date', $date)
-            ->where('type', $type)
-            ->where('session_id', $session_id)
-            ->orderBy('id', 'desc');
+        $tracking_data_unique = Tracking::whereBetween('date', [$date_start, $date_end])
+                    ->select('session_id')
+                    ->groupBy('session_id')
+                    ->get();
+        return count($tracking_data_unique->toArray());
+    }
 
-        if ($tracking->first()) {
-            $tracking_last_view_count = $tracking->first()->toArray()['value'];
+    /**
+     * [buildCsvFromTrackingData description]
+     *
+     * @param  [type] $data       [description]
+     * @param  [type] $date_start [description]
+     * @param  [type] $date_end   [description]
+     *
+     * @return [type]             [description]
+     */
+    protected function buildCsvFromTrackingData($data, $date_start, $date_end)
+    {
+        $csv_data = [];
 
-            $tracking_view_count_inc = ($tracking_last_view_count > 0)
-                ? $tracking_last_view_count + 1
-                : 1;
-
-            return $tracking_view_count_inc;
+        foreach ($data as $tracking_type => $data_process) {
+            $csv_data[] = [
+                'date_start' => $date_start,
+                'date_end' => $date_end,
+                'type' => $tracking_type,
+                'events' => $data_process['events'],
+                'home' => $data_process['home'] ?? 'n/a',
+                'news' => $data_process['news'],
+                'total' => $data_process['website'],
+            ];
         }
 
-        return 1;
+        $csv = Writer::createFromString('');
+        $csv->insertOne($this->csv_headers);
+
+        foreach ($csv_data as $row) {
+            $csv->insertOne($row);
+        }
+
+        return $csv->getContent();
+    }
+
+    /**
+     * [getTotalViewsPerType description]
+     *
+     * @param  [type] $date_start [description]
+     * @param  [type] $date_end   [description]
+     *
+     * @return [type]             [description]
+     */
+    protected function getTotalViewsPerType($date_start, $date_end)
+    {
+        $tracking_data_per_page = Tracking::whereBetween(
+            'date',
+            [$date_start, $date_end]
+        )
+        ->select('type', 'value')
+        ->groupBy('type', 'value')
+        ->get();
+
+        foreach ($tracking_data_per_page->toArray() as $tracking_data) {
+            $type = $tracking_data['type'];
+            $item_type = $this->type_item_type_mapping[$type];
+
+            if (isset(${$item_type . "_view_count_total"})) {
+                ${$item_type . "_view_count_total"} += $tracking_data['value'];
+            } else {
+                ${$item_type . "_view_count_total"} = $tracking_data['value'];
+            }
+        }
+
+        $events_view_count_total = isset($events_view_count_total)
+            ? $events_view_count_total
+            : 0;
+        $news_view_count_total = isset($news_view_count_total)
+            ? $news_view_count_total
+            : 0;
+        $website_view_count_total = isset($website_view_count_total)
+            ? $website_view_count_total
+            : 0;
+
+        // visits to home can be obtained from the difference between
+        // website views and other page views
+        $home_view_count_total = $website_view_count_total -
+            ($events_view_count_total + $news_view_count_total);
+
+        return [
+            'events' => $events_view_count_total,
+            'home' => $home_view_count_total,
+            'news' => $news_view_count_total,
+            'website' => $website_view_count_total,
+        ];
+    }
+
+    /**
+     * Gets data for unique views by type
+     *
+     * @param string $date_start
+     * @param string $date_end
+     *
+     * @return array
+     */
+    protected function getUniqueViewsPerType($date_start, $date_end)
+    {
+        $tracking_data_unique_per_page = Tracking::whereBetween(
+            'date',
+            [$date_start, $date_end]
+        )
+        ->select('type', 'session_id')
+        ->groupBy('type', 'session_id')
+        ->get();
+
+        foreach ($tracking_data_unique_per_page->toArray() as $tracking_data) {
+            $type = $tracking_data['type'];
+            $item_type = $this->type_item_type_mapping[$type];
+
+            if (isset(${$item_type . "_view_count_unique"})) {
+                ${$item_type . "_view_count_unique"}++;
+            } else {
+                ${$item_type . "_view_count_unique"} = 1;
+            }
+        }
+
+        $home_view_count_unique = $website_view_count_unique -
+            ($events_view_count_unique + $news_view_count_unique);
+
+        return [
+            'events' => $events_view_count_unique,
+            'home' => $home_view_count_unique,
+            'website' => $website_view_count_unique,
+            'news' => $news_view_count_unique,
+        ];
+    }
+
+    /**
+     * [getTrackingDataForCsv description]
+     *
+     * @param  [type] $date_start [description]
+     * @param  [type] $date_end   [description]
+     *
+     * @return [type]             [description]
+     */
+    protected function getTrackingDataForCsv($date_start, $date_end)
+    {
+        return [
+            'total' => $this->getTotalViewsPerType($date_start, $date_end),
+            'unique' => $this->getUniqueViewsPerType($date_start, $date_end)
+        ];
     }
 
     /**
@@ -46,56 +211,39 @@ class TrackingController
      */
     public function index(Request $request)
     {
-        $tracking = new Tracking();
+        $date_start = $request->input('date_start') ?? Carbon::now()->subDays(7)->toDateString();
+        $date_end = $request->input('date_end') ?? Carbon::now()->toDateString();
 
-        $date = Carbon::now()->toDateString();
-        $session_id = $this->getSessionId();
-        $type = $request->get('type');
-        $view_count_inc = $this->getNewViewCountByDateTypeAndSessionId($date, $type, $session_id);
-
-        $values = [];
-        $values['date'] = $date;
-        $values['session_id'] = $session_id;
-        $values['type'] = $type;
-        $values['value'] = $view_count_inc;
-
-        $tracking->fill($values);
-        $tracking->save();
-
-        die();
-
-        echo json_encode($request->request);
+        $data = [
+            'date_start' => $date_start,
+            'date_end' => $date_end,
+            'page_views' => $this->getTotalPageViews($date_start, $date_end),
+            'unique_views' => $this->getTotalUniqueViews($date_start, $date_end)
+        ];
     }
 
     /**
-     * Show the form for creating a new resource.
+     * [downloadCsv description]
      *
-     * @return \Illuminate\Http\Response
+     * @param  Request $request [description]
+     *
+     * @return [type]           [description]
      */
-    public function create()
+    public function downloadCsv(Request $request)
     {
-        //
-    }
+        $date_start = $request->input('date_start') ?? Carbon::now()->subDays(7)->toDateString();
+        $date_end = $request->input('date_end') ?? Carbon::now()->toDateString();
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        echo json_encode($request);
-    }
+        $csv_string = $this->buildCsvFromTrackingData(
+            $this->getTrackingDataForCsv($date_start, $date_end), $date_start, $date_end
+        );
+        $csv_filename = str_replace('-', '', "tracking_{$date_start}_{$date_end}.csv");
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\ModelsTracking  $modelsTracking
-     * @return \Illuminate\Http\Response
-     */
-    // public function show(ModelsTracking $modelsTracking)
-    // {
-    //     //
-    // }
+        header("Content-Disposition: attachment; filename={$csv_filename}");
+        header('Content-Type: text/plain');
+        header('Content-Length: ' . strlen($csv_string));
+        header('Connection: close');
+
+        echo $csv_string;
+    }
 }

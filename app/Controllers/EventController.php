@@ -2,7 +2,7 @@
 
 namespace App\Controllers;
 
-class HomeController {
+class EventController {
     protected $view_path = 'home';
     protected $item_path = 'home/';
 
