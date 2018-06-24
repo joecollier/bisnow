@@ -21,11 +21,14 @@ Route::get('news/{id}', '\App\Controllers\NewsController@index');
 
 Route::get('events', '\App\Controllers\EventsController@index');
 
-Route::get('/events/{id}', function ($id) {
-    return 'Events! - ' . $id;
-});
+Route::get('events/{id}', '\App\Controllers\EventsController@index');
 
 Route::get('tracking', '\App\Controllers\TrackingController@index');
 
-Route::post('tracking', '\App\Controllers\TrackingController@Store');
+Route::get('tracking/csv', '\App\Controllers\TrackingController@downloadCsv');
 
+// Route::get('tracking/{type}', '\App\Controllers\TrackingController@store');
+
+Route::get('pageviews', '\App\Controllers\PageViewsController@store');
+
+Route::post('pageviews', '\App\Controllers\PageViewsController@store');
