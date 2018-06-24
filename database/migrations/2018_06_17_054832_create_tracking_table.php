@@ -19,10 +19,11 @@ class CreateTrackingTable extends Migration
             $table->string('date')->nullable();
             $table->enum('type', [
                 'website_views',
-                'event_views',
+                'events_views',
                 'news_views',
             ]);
             $table->integer('value')->nullable();
+            $table->unique(['session_id','date','type']);
         });
     }
 

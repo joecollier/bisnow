@@ -18,8 +18,12 @@ class CreateViewsTable extends Migration
             $table->string('url');
             $table->string('ip_address');
             $table->string('session_id');
-            $table->string('item_type');
-            $table->string('item_id');
+            $table->enum('item_type', [
+                'events',
+                'news',
+                'home',
+            ]);
+            $table->integer('item_id');
             $table->string('email');
             $table->string('marketing_tracking_code');
             $table->timestamps();
