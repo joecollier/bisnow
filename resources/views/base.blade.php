@@ -21,8 +21,12 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 </head>
 <body>
-<div id="top-nav">&nbsp;</div>
 <div>
+    <div id="header" class="bg-info">
+        <div class="header-link"><a href="/">HOME</a></div>
+        <div class="header-link"><a href="/news">NEWS</a></div>
+        <div class="header-link"><a href="/events">EVENTS</a></div>
+    </div>
     <main id="main">
         @yield('content')
     </main>

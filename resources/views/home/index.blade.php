@@ -1,8 +1,6 @@
 @extends('base')
 @section('title', 'HOME')
 @section('content')
-    HOME
-
 <script type="text/javascript">
     $(document).ready(function() {
         var pathname = window.location.pathname; // Returns path only
@@ -28,7 +26,6 @@
         });
     });
 </script>
-
 @endsection
 @section('links')
     <div id="footer-links">&nbsp;</div>

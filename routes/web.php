@@ -27,8 +27,6 @@ Route::get('tracking', '\App\Controllers\TrackingController@index');
 
 Route::get('tracking/csv', '\App\Controllers\TrackingController@downloadCsv');
 
-// Route::get('tracking/{type}', '\App\Controllers\TrackingController@store');
-
 Route::get('pageviews', '\App\Controllers\PageViewsController@store');
 
 Route::post('pageviews', '\App\Controllers\PageViewsController@store');

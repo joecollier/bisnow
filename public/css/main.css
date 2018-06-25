@@ -1,3 +1,15 @@
+#header {
+    margin: auto;
+    text-align: center;
+    display: flex;
+    padding: 1% 0 1% 0;
+}
+
+#main {
+    padding: 2%;
+    text-align: center;
+}
+
 #footer {
     text-align: center;
     border-top: 1px solid black;
@@ -8,6 +20,11 @@
     float: left;
     clear: both;
     margin:auto;
+}
+
+.header-link {
+    width: 30%;
+    float: left;
 }
 
 #footer-left {

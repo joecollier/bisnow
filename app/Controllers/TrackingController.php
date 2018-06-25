@@ -10,6 +10,9 @@ use League\Csv\Writer;
 
 class TrackingController
 {
+    protected $view_path = 'tracking';
+    protected $item_path = 'tracking/';
+
     /**
      * [$type_item_type_mapping description]
      * @var [type]
@@ -189,12 +192,12 @@ class TrackingController
     }
 
     /**
-     * [getTrackingDataForCsv description]
+     * Returns array with total and unique page view data
      *
-     * @param  [type] $date_start [description]
-     * @param  [type] $date_end   [description]
+     * @param string $date_start
+     * @param string $date_end
      *
-     * @return [type]             [description]
+     * @return array
      */
     protected function getTrackingDataForCsv($date_start, $date_end)
     {
@@ -220,14 +223,15 @@ class TrackingController
             'page_views' => $this->getTotalPageViews($date_start, $date_end),
             'unique_views' => $this->getTotalUniqueViews($date_start, $date_end)
         ];
+
+        return view($this->view_path . '/index', [
+            'tracking_json' => json_encode($data),
+            'path' => $this->item_path]);
     }
 
     /**
-     * [downloadCsv description]
+     * Used for downloading CSV with tracking data
      *
-     * @param  Request $request [description]
-     *
-     * @return [type]           [description]
      */
     public function downloadCsv(Request $request)
     {
